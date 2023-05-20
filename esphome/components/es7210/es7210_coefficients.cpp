@@ -5,8 +5,8 @@ namespace es7210 {
 
 // clock coefficient lookup table
 
-static const ES7210Coefficient coefficients[] = {
-  // clang-format off
+static const ES7210Coefficient ES7210_COEFFICIENTS[] = {
+    // clang-format off
 
   //    mclk      lrck    ss_ds adc_div  dll  doubler osr  mclk_src  lrckh   lrckl
   /* 8k */
@@ -60,14 +60,13 @@ static const ES7210Coefficient coefficients[] = {
     // clang-format on
 };
 
-const ES7210Coefficient *ES7210Component::get_coeff(uint32_t mclk, uint32_t lrck)
-{
-    for (int i = 0; i < sizeof(coefficients) / sizeof(ES7210Coefficient); i++) {
-        if (coefficients[i].lrck == lrck && coefficients[i].mclk == mclk) {
-            return &coefficients[i];
-        }
+const ES7210Coefficient *ES7210Component::get_coefficient(uint32_t mclk, uint32_t lrck) {
+  for (const auto &coefficient : ES7210_COEFFICIENTS) {
+    if (coefficient.mclk == mclk && coefficient.lrck == lrck) {
+      return &coefficient;
     }
-    return nullptr;
+  }
+  return nullptr;
 }
 
 }  // namespace es7210
