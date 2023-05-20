@@ -33,24 +33,24 @@ void ES7210Component::setup() {
 
 void ES7210Component::config_codec_(const ES7210Config *codec_conf) {
   // Perform software reset
-  ES7210_WRITE_BYTE(ES7210_RESET, 0xFF);
-  ES7210_WRITE_BYTE(ES7210_RESET, 0x32);
+  ES7210_WRITE_BYTE(ES7210_REG00_RESET, 0xFF);
+  ES7210_WRITE_BYTE(ES7210_REG00_RESET, 0x32);
 
   // Set the initialization time when device powers up
-  ES7210_WRITE_BYTE(ES7210_TIME_CONTROL0, 0x30);
-  ES7210_WRITE_BYTE(ES7210_TIME_CONTROL1, 0x30);
+  ES7210_WRITE_BYTE(ES7210_REG09_TIME_CONTROL0, 0x30);
+  ES7210_WRITE_BYTE(ES7210_REG0A_TIME_CONTROL1, 0x30);
 
   // Configure HPF for ADC1-4
-  ES7210_WRITE_BYTE(ES7210_ADC12_HPF1, 0x2A);
-  ES7210_WRITE_BYTE(ES7210_ADC12_HPF2, 0x0A);
-  ES7210_WRITE_BYTE(ES7210_ADC34_HPF1, 0x2A);
-  ES7210_WRITE_BYTE(ES7210_ADC34_HPF2, 0x0A);
+  ES7210_WRITE_BYTE(ES7210_REG22_ADC12_HPF1, 0x2A);
+  ES7210_WRITE_BYTE(ES7210_REG23_ADC12_HPF2, 0x0A);
+  ES7210_WRITE_BYTE(ES7210_REG21_ADC34_HPF1, 0x2A);
+  ES7210_WRITE_BYTE(ES7210_REG20_ADC34_HPF2, 0x0A);
 
   // Set bits per sample, data protocol and TDM
   set_i2s_format_(codec_conf->i2s_format, codec_conf->bit_width, codec_conf->tdm_enable);
 
   // Configure analog power and VMID voltage
-  ES7210_WRITE_BYTE(ES7210_ANALOG, 0xC3);
+  ES7210_WRITE_BYTE(ES7210_REG40_ANALOG, 0xC3);
 
   // Set mic bias
   set_mic_bias_(codec_conf->mic_bias);
@@ -59,24 +59,24 @@ void ES7210Component::config_codec_(const ES7210Config *codec_conf) {
   set_mic_gain_(codec_conf->mic_gain);
 
   // Power on
-  ES7210_WRITE_BYTE(ES7210_MIC1_LOW_PWR, 0x08);
-  ES7210_WRITE_BYTE(ES7210_MIC2_LOW_PWR, 0x08);
-  ES7210_WRITE_BYTE(ES7210_MIC3_LOW_PWR, 0x08);
-  ES7210_WRITE_BYTE(ES7210_MIC4_LOW_PWR, 0x08);
+  ES7210_WRITE_BYTE(ES7210_REG47_MIC1_LOW_PWR, 0x08);
+  ES7210_WRITE_BYTE(ES7210_REG48_MIC2_LOW_PWR, 0x08);
+  ES7210_WRITE_BYTE(ES7210_REG49_MIC3_LOW_PWR, 0x08);
+  ES7210_WRITE_BYTE(ES7210_REG4A_MIC4_LOW_PWR, 0x08);
 
   // Set ADC sample rate
   set_i2s_sample_rate_(codec_conf->sample_rate_hz, codec_conf->mclk_ratio);
 
   // Power down DLL
-  ES7210_WRITE_BYTE(ES7210_PWR_DOWN, 0x04);
+  ES7210_WRITE_BYTE(ES7210_REG06_PWR_DOWN, 0x04);
 
   // Power on MIC1-4 bias & ADC1-4 & PGA1-4 Power
-  ES7210_WRITE_BYTE(ES7210_MIC12_PWR_DOWN, 0x0F);
-  ES7210_WRITE_BYTE(ES7210_MIC34_PWR_DOWN, 0x0F);
+  ES7210_WRITE_BYTE(ES7210_REG4B_MIC12_PWR_DOWN, 0x0F);
+  ES7210_WRITE_BYTE(ES7210_REG4C_MIC34_PWR_DOWN, 0x0F);
 
   // Enable device
-  ES7210_WRITE_BYTE(ES7210_RESET, 0x71);
-  ES7210_WRITE_BYTE(ES7210_RESET, 0x41);
+  ES7210_WRITE_BYTE(ES7210_REG00_RESET, 0x71);
+  ES7210_WRITE_BYTE(ES7210_REG00_RESET, 0x41);
 }
 
 void ES7210Component::set_volume(int8_t volume_db) {
@@ -86,10 +86,10 @@ void ES7210Component::set_volume(int8_t volume_db) {
    */
   uint8_t reg_val = 191 + volume_db * 2;
 
-  ES7210_WRITE_BYTE(ES7210_ADC1_MAX_GAIN, reg_val);
-  ES7210_WRITE_BYTE(ES7210_ADC2_MAX_GAIN, reg_val);
-  ES7210_WRITE_BYTE(ES7210_ADC3_MAX_GAIN, reg_val);
-  ES7210_WRITE_BYTE(ES7210_ADC4_MAX_GAIN, reg_val);
+  ES7210_WRITE_BYTE(ES7210_REG1E_ADC1_MAX_GAIN, reg_val);
+  ES7210_WRITE_BYTE(ES7210_REG1D_ADC2_MAX_GAIN, reg_val);
+  ES7210_WRITE_BYTE(ES7210_REG1C_ADC3_MAX_GAIN, reg_val);
+  ES7210_WRITE_BYTE(ES7210_REG1B_ADC4_MAX_GAIN, reg_val);
 }
 
 void ES7210Component::set_i2s_format_(ES7210Format i2s_format, ES7210Resolution bit_width, bool tdm_enable) {
@@ -116,7 +116,7 @@ void ES7210Component::set_i2s_format_(ES7210Format i2s_format, ES7210Resolution 
       this->mark_failed();
       return;
   }
-  ES7210_WRITE_BYTE(ES7210_SDP_INTERFACE1, i2s_format | reg_val);
+  ES7210_WRITE_BYTE(ES7210_REG11_SDP_INTERFACE1, i2s_format | reg_val);
 
   const char *mode_str = NULL;
   switch (i2s_format) {
@@ -143,9 +143,9 @@ void ES7210Component::set_i2s_format_(ES7210Format i2s_format, ES7210Resolution 
   }
 
   if (tdm_enable) {  // enable 1xFS TDM
-    ES7210_WRITE_BYTE(ES7210_SDP_INTERFACE2, reg_val);
+    ES7210_WRITE_BYTE(ES7210_REG12_SDP_INTERFACE2, reg_val);
   } else {
-    ES7210_WRITE_BYTE(ES7210_SDP_INTERFACE2, 0x00);
+    ES7210_WRITE_BYTE(ES7210_REG12_SDP_INTERFACE2, 0x00);
   }
 
   ESP_LOGI(TAG, "format: %s, bit width: %d, tdm mode %s", mode_str, bit_width, tdm_enable ? "enabled" : "disabled");
@@ -160,26 +160,26 @@ void ES7210Component::set_i2s_sample_rate_(uint32_t sample_rate_hz, uint32_t mcl
     return;
   }
   // Set osr
-  ES7210_WRITE_BYTE(ES7210_OSR, coeff_div->osr);
+  ES7210_WRITE_BYTE(ES7210_REG07_OSR, coeff_div->osr);
   // Set adc_div & doubler & dll
-  ES7210_WRITE_BYTE(ES7210_MAIN_CLK, (coeff_div->adc_div) | (coeff_div->doubler << 6) | (coeff_div->dll << 7));
+  ES7210_WRITE_BYTE(ES7210_REG02_MAIN_CLK, (coeff_div->adc_div) | (coeff_div->doubler << 6) | (coeff_div->dll << 7));
   // Set lrck
-  ES7210_WRITE_BYTE(ES7210_LRCK_DIVH, coeff_div->lrck_h);
-  ES7210_WRITE_BYTE(ES7210_LRCK_DIVL, coeff_div->lrck_l);
+  ES7210_WRITE_BYTE(ES7210_REG04_LRCK_DIVH, coeff_div->lrck_h);
+  ES7210_WRITE_BYTE(ES7210_REG05_LRCK_DIVL, coeff_div->lrck_l);
 
   ESP_LOGI(TAG, "sample rate: %d Hz, mclk frequency: %d Hz", sample_rate_hz, mclk_freq_hz);
 }
 
 void ES7210Component::set_mic_gain_(ES7210MicGain mic_gain) {
-  ES7210_WRITE_BYTE(ES7210_MIC1_GAIN, mic_gain | 0x10);
-  ES7210_WRITE_BYTE(ES7210_MIC2_GAIN, mic_gain | 0x10);
-  ES7210_WRITE_BYTE(ES7210_MIC3_GAIN, mic_gain | 0x10);
-  ES7210_WRITE_BYTE(ES7210_MIC4_GAIN, mic_gain | 0x10);
+  ES7210_WRITE_BYTE(ES7210_REG43_MIC1_GAIN, mic_gain | 0x10);
+  ES7210_WRITE_BYTE(ES7210_REG44_MIC2_GAIN, mic_gain | 0x10);
+  ES7210_WRITE_BYTE(ES7210_REG45_MIC3_GAIN, mic_gain | 0x10);
+  ES7210_WRITE_BYTE(ES7210_REG46_MIC4_GAIN, mic_gain | 0x10);
 }
 
 void ES7210Component::set_mic_bias_(ES7210MicBias mic_bias) {
-  ES7210_WRITE_BYTE(ES7210_MIC12_BIAS, mic_bias);
-  ES7210_WRITE_BYTE(ES7210_MIC34_BIAS, mic_bias);
+  ES7210_WRITE_BYTE(ES7210_REG41_MIC12_BIAS, mic_bias);
+  ES7210_WRITE_BYTE(ES7210_REG42_MIC34_BIAS, mic_bias);
 }
 
 }  // namespace es7210
