@@ -7,7 +7,6 @@ from esphome.const import CONF_ID
 es7210_ns = cg.esphome_ns.namespace("es7210")
 ES7210Component = es7210_ns.class_("ES7210Component", cg.Component, i2c.I2CDevice)
 
-
 CONFIG_SCHEMA = (
     cv.Schema({cv.GenerateID(): cv.declare_id(ES7210Component)})
     .extend(i2c.i2c_device_schema(0x40))
