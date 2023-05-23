@@ -20,7 +20,7 @@ void ES7210Component::setup() {
   ESP_LOGCONFIG(TAG, "Setting up ES7210...");
 
   ES7210Config codec_conf = {.sample_rate_hz = 16000,
-                             .mclk_ratio = 768,
+                             .mclk_ratio = 256,
                              .i2s_format = ES7210_FORMAT_I2S,
                              .bit_width = ES7210_RESOLUTION_16,
                              .mic_bias = ES7210_MIC_BIAS_2V87,
@@ -29,6 +29,20 @@ void ES7210Component::setup() {
 
   this->config_codec_(&codec_conf);
   this->set_volume(0);
+}
+
+void ES7210Component::dump_config() {
+  ESP_LOGCONFIG(TAG, "ES7210 Audio Codec:");
+  if (this->is_failed()) {
+    ESP_LOGCONFIG(TAG, "  Failed to initialize!");
+    return;
+  }
+  ESP_LOGV(TAG, "  Register Values:");
+  for (uint8_t reg = 0; reg <= 0x4C; reg++) {
+    uint8_t value;
+    ES7210_READ_BYTE(reg, &value);
+    ESP_LOGV(TAG, "    %02x = %02x", reg, value);
+  }
 }
 
 void ES7210Component::config_codec_(const ES7210Config *codec_conf) {

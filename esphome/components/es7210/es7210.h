@@ -60,7 +60,7 @@ struct ES7210Config {
   uint32_t mclk_ratio;         // MCLK-to-Sample-rate clock ratio, typically 256
   ES7210Format i2s_format;     // I2S format of ES7210's output, can be any value in es7210_i2s_fmt_t
   ES7210Resolution bit_width;  // I2S bit width of ES7210's output, can be any value in es7210_i2s_bits_t
-  ES7210MicBias mic_bias;      // Bias volatge of analog MIC, please refer to your MIC's datasheet
+  ES7210MicBias mic_bias;      // Bias voltage of analog MIC, please refer to your MIC's datasheet
   ES7210MicGain mic_gain;      // Gain of analog MIC, please adjust according to your MIC's sensitivity
   uint32_t tdm_enable;         // Choose whether to enable TDM mode
 };
@@ -83,6 +83,7 @@ class ES7210Component : public Component, public i2c::I2CDevice {
  public:
   void setup() override;
   float get_setup_priority() const override { return setup_priority::LATE - 1; }
+  void dump_config() override;
 
   void set_volume(int8_t volume);
 
