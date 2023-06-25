@@ -20,7 +20,7 @@ void ES7210Component::setup() {
   ESP_LOGCONFIG(TAG, "Setting up ES7210...");
 
   ES7210Config codec_conf = {.sample_rate_hz = 16000,
-                             .mclk_ratio = 768,
+                             .mclk_ratio = 256,
                              .i2s_format = ES7210_FORMAT_I2S,
                              .bit_width = ES7210_RESOLUTION_16,
                              .mic_bias = ES7210_MIC_BIAS_2V87,
@@ -31,49 +31,52 @@ void ES7210Component::setup() {
   this->set_volume(0);
 }
 
+void ES7210Component::dump_config() {
+  ESP_LOGCONFIG(TAG, "ES7210 Audio Codec:");
+  if (this->is_failed()) {
+    ESP_LOGCONFIG(TAG, "  Failed to initialize!");
+    return;
+  }
+  ESP_LOGV(TAG, "  Register Values:");
+  for (uint8_t reg = 0; reg <= 0x4C; reg++) {
+    uint8_t value;
+    ES7210_READ_BYTE(reg, &value);
+    ESP_LOGV(TAG, "    %02x = %02x", reg, value);
+  }
+}
+
 void ES7210Component::config_codec_(const ES7210Config *codec_conf) {
   // Perform software reset
   ES7210_WRITE_BYTE(ES7210_REG00_RESET, 0xFF);
   ES7210_WRITE_BYTE(ES7210_REG00_RESET, 0x32);
-
   // Set the initialization time when device powers up
   ES7210_WRITE_BYTE(ES7210_REG09_TIME_CONTROL0, 0x30);
   ES7210_WRITE_BYTE(ES7210_REG0A_TIME_CONTROL1, 0x30);
-
   // Configure HPF for ADC1-4
   ES7210_WRITE_BYTE(ES7210_REG22_ADC12_HPF1, 0x2A);
   ES7210_WRITE_BYTE(ES7210_REG23_ADC12_HPF2, 0x0A);
   ES7210_WRITE_BYTE(ES7210_REG21_ADC34_HPF1, 0x2A);
   ES7210_WRITE_BYTE(ES7210_REG20_ADC34_HPF2, 0x0A);
-
   // Set bits per sample, data protocol and TDM
   set_i2s_format_(codec_conf->i2s_format, codec_conf->bit_width, codec_conf->tdm_enable);
-
   // Configure analog power and VMID voltage
   ES7210_WRITE_BYTE(ES7210_REG40_ANALOG, 0xC3);
-
   // Set mic bias
   set_mic_bias_(codec_conf->mic_bias);
-
   // Set mic gain
   set_mic_gain_(codec_conf->mic_gain);
-
   // Power on
   ES7210_WRITE_BYTE(ES7210_REG47_MIC1_LOW_PWR, 0x08);
   ES7210_WRITE_BYTE(ES7210_REG48_MIC2_LOW_PWR, 0x08);
   ES7210_WRITE_BYTE(ES7210_REG49_MIC3_LOW_PWR, 0x08);
   ES7210_WRITE_BYTE(ES7210_REG4A_MIC4_LOW_PWR, 0x08);
-
   // Set ADC sample rate
   set_i2s_sample_rate_(codec_conf->sample_rate_hz, codec_conf->mclk_ratio);
-
   // Power down DLL
   ES7210_WRITE_BYTE(ES7210_REG06_PWR_DOWN, 0x04);
-
   // Power on MIC1-4 bias & ADC1-4 & PGA1-4 Power
   ES7210_WRITE_BYTE(ES7210_REG4B_MIC12_PWR_DOWN, 0x0F);
   ES7210_WRITE_BYTE(ES7210_REG4C_MIC34_PWR_DOWN, 0x0F);
-
   // Enable device
   ES7210_WRITE_BYTE(ES7210_REG00_RESET, 0x71);
   ES7210_WRITE_BYTE(ES7210_REG00_RESET, 0x41);
