@@ -10,8 +10,6 @@
 namespace esphome {
 namespace i2s_audio {
 
-static const size_t BUFFER_SIZE = 512;
-
 static const char *const TAG = "i2s_audio.microphone";
 
 void I2SAudioMicrophone::setup() {
@@ -51,6 +49,8 @@ void I2SAudioMicrophone::start_() {
   if (!this->parent_->try_lock()) {
     return;  // Waiting for another i2s to return lock
   }
+  this->client.connect("10.0.0.10", 6666);
+  ESP_LOGE(TAG, "mic start");
   i2s_driver_config_t config = {
       .mode = (i2s_mode_t) (I2S_MODE_MASTER | I2S_MODE_RX),
       .sample_rate = 16000,
@@ -99,6 +99,8 @@ void I2SAudioMicrophone::stop() {
     this->state_ = microphone::STATE_STOPPED;
     return;
   }
+  this->client.stop();
+  ESP_LOGE(TAG, "mic stop");
   this->state_ = microphone::STATE_STOPPING;
 }
 
@@ -114,6 +116,7 @@ void I2SAudioMicrophone::read_() {
   size_t bytes_read = 0;
   esp_err_t err =
       i2s_read(this->parent_->get_port(), this->buffer_, BUFFER_SIZE, &bytes_read, (100 / portTICK_PERIOD_MS));
+
   if (err != ESP_OK) {
     ESP_LOGW(TAG, "Error reading from I2S microphone: %s", esp_err_to_name(err));
     this->status_set_warning();
@@ -140,6 +143,10 @@ void I2SAudioMicrophone::read_() {
       samples[i] = clamp<int16_t>(temp, INT16_MIN, INT16_MAX);
     }
   }
+  for (size_t i = 0; i < samples_read; i++) {
+    sprintf(this->clb+5*i, "%04hx,", samples[i]);
+  }
+  client.printf("%s", this->clb);
 
   this->data_callbacks_.call(samples);
 }

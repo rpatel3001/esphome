@@ -4,7 +4,7 @@ import esphome.codegen as cg
 from esphome import pins
 from esphome.const import CONF_CHANNEL, CONF_ID, CONF_NUMBER
 from esphome.components import microphone, esp32
-from esphome.components.adc import ESP32_VARIANT_ADC1_PIN_TO_CHANNEL, validate_adc_pin
+#from esphome.components.adc import ESP32_VARIANT_ADC1_PIN_TO_CHANNEL, validate_adc_pin
 
 from .. import (
     i2s_audio_ns,
@@ -71,11 +71,11 @@ BASE_SCHEMA = microphone.MICROPHONE_SCHEMA.extend(
 CONFIG_SCHEMA = cv.All(
     cv.typed_schema(
         {
-            "internal": BASE_SCHEMA.extend(
-                {
-                    cv.Required(CONF_ADC_PIN): validate_adc_pin,
-                }
-            ),
+#            "internal": BASE_SCHEMA.extend(
+#                {
+#                    cv.Required(CONF_ADC_PIN): validate_adc_pin,
+#                }
+#            ),
             "external": BASE_SCHEMA.extend(
                 {
                     cv.Required(CONF_I2S_DIN_PIN): pins.internal_gpio_input_pin_number,
@@ -98,8 +98,8 @@ async def to_code(config):
     if config[CONF_ADC_TYPE] == "internal":
         variant = esp32.get_esp32_variant()
         pin_num = config[CONF_ADC_PIN][CONF_NUMBER]
-        channel = ESP32_VARIANT_ADC1_PIN_TO_CHANNEL[variant][pin_num]
-        cg.add(var.set_adc_channel(channel))
+#        channel = ESP32_VARIANT_ADC1_PIN_TO_CHANNEL[variant][pin_num]
+#        cg.add(var.set_adc_channel(channel))
     else:
         cg.add(var.set_din_pin(config[CONF_I2S_DIN_PIN]))
         cg.add(var.set_pdm(config[CONF_PDM]))

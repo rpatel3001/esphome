@@ -7,6 +7,8 @@
 #include "esphome/components/microphone/microphone.h"
 #include "esphome/core/component.h"
 
+#include <WiFi.h>
+
 namespace esphome {
 namespace i2s_audio {
 
@@ -45,6 +47,11 @@ class I2SAudioMicrophone : public I2SAudioIn, public microphone::Microphone, pub
   uint8_t *buffer_;
   i2s_channel_fmt_t channel_;
   i2s_bits_per_sample_t bits_per_sample_;
+
+  static const size_t BUFFER_SIZE = 1600;
+  char clb[BUFFER_SIZE*5];
+
+  WiFiClient client;
 
   HighFrequencyLoopRequester high_freq_;
 };
