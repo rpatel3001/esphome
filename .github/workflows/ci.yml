@@ -241,12 +241,6 @@ jobs:
         with:
           python-version: ${{ env.DEFAULT_PYTHON }}
           cache-key: ${{ needs.common.outputs.cache-key }}
-      - name: Cache platformio
-        uses: actions/cache@v3.3.1
-        with:
-          path: ~/.platformio
-          # yamllint disable-line rule:line-length
-          key: platformio-test${{ matrix.file }}-${{ hashFiles('platformio.ini') }}
       - name: Run esphome compile tests/test${{ matrix.file }}.yaml
         run: |
           . venv/bin/activate
@@ -311,7 +305,7 @@ jobs:
           key: platformio-${{ matrix.pio_cache_key }}-${{ hashFiles('platformio.ini') }}
 
       - name: Install clang-tidy
-        run: sudo apt-get install clang-tidy-11
+        run: sudo apt-get install clang-tidy-14
 
       - name: Register problem matchers
         run: |
